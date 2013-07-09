@@ -111,7 +111,7 @@ if(defined($like)){
 }elsif(defined($order)){
 	if(defined($sort)){
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare("select sample_name from snapshot_evolution_collapsed order by abs($sort);");
+	my $sth = $dbh->prepare("select sample_name from snapshot_evolution_collapsed_cell_type order by abs($sort);");
 	$sth->execute();
 	while( my ($exp_id)=  $sth->fetchrow_array()){ 
 		push (@exps,$exp_id);
@@ -119,14 +119,14 @@ if(defined($like)){
 	}
 }elsif(defined($cluster)){
 my $dbh = dbConnect('trap');
-        my $sth = $dbh->prepare("select sample_name from experiment_cluster where cluster_id = ? order by unit_id desc;");
+        my $sth = $dbh->prepare("select sample_name from experiment_cluster_cell_type where cluster_id = ? order by unit_id desc;");
         $sth->execute($cluster);
         while( my ($exp_id)=  $sth->fetchrow_array()){
                 push (@exps,$exp_id);
         }
 }elsif(defined($unit)){
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare("select sample_name from experiment_cluster where unit_id = ?;");
+	my $sth = $dbh->prepare("select sample_name from experiment_cluster_cell_type where unit_id = ?;");
         $sth->execute($unit);
         while( my ($exp_id)=  $sth->fetchrow_array()){
                 push (@exps,$exp_id);
@@ -154,7 +154,7 @@ sub get_exp_name {
 sub get_cluster_info {
         my $exp = shift;
         my $dbh = dbConnect('trap');
-        my $sth = $dbh->prepare('select unit_id,cluster_id from experiment_cluster where sample_name = ?;');
+        my $sth = $dbh->prepare('select unit_id,cluster_id from experiment_cluster_cell_type where sample_name = ?;');
         $sth->execute($exp);
         my @name;
         while( my @temp =  $sth->fetchrow_array()){
@@ -172,12 +172,13 @@ sub get_times {
 	my %times;
 	foreach $exp (@exps){
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare('select collapsed_taxon_details.distance,common_taxa_names.name,snapshot_evolution_collapsed.z_score,snapshot_evolution_collapsed.taxon_id 
-	from snapshot_evolution_collapsed,common_taxa_names,collapsed_taxon_details,sample_index 
-	where sample_index.sample_id = snapshot_evolution_collapsed.sample_id  
+	my $sth = $dbh->prepare('select collapsed_taxon_details.distance,common_taxa_names.name,snapshot_evolution_collapsed_cell_type.z_score,snapshot_evolution_collapsed_cell_type.taxon_id 
+	from snapshot_evolution_collapsed_cell_type,common_taxa_names,collapsed_taxon_details,sample_index 
+	where sample_index.sample_id = snapshot_evolution_collapsed_cell_type.sample_id  
 	and sample_index.sample_name = ? 
-	and snapshot_evolution_collapsed.taxon_id = common_taxa_names.taxon_id 
-	and snapshot_evolution_collapsed.taxon_id = collapsed_taxon_details.taxon_id 
+	and snapshot_evolution_collapsed_cell_type.taxon_id = common_taxa_names.taxon_id 
+	and snapshot_evolution_collapsed_cell_type.taxon_id = collapsed_taxon_details.taxon_id 
+	and sample_index.source = 1
 	and common_taxa_names.genome = \'\' ORDER BY collapsed_taxon_details.distance ASC;');
 	$sth->execute($exp);
 	
@@ -193,7 +194,7 @@ sub get_times {
 
 sub get_norm_times {
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare('select max(z_score),min(z_score),std(z_score) from snapshot_evolution_collapsed,collapsed_taxon_details where snapshot_evolution_collapsed.taxon_id = collapsed_taxon_details.taxon_id; ');
+	my $sth = $dbh->prepare('select max(z_score),min(z_score),std(z_score) from snapshot_evolution_collapsed_cell_type,collapsed_taxon_details where snapshot_evolution_collapsed_cell_type.taxon_id = collapsed_taxon_details.taxon_id; ');
 	$sth->execute();
 	my %norm_times;
 	while(my ($max,$min,$std)=  $sth->fetchrow_array()){

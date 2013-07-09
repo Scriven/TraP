@@ -102,8 +102,7 @@ my $like = $cgi->param('like');
 my $order = $cgi->param('order');
 if(defined($like)){
 	my $dbh = dbConnect('trap');
-    #TODO need to use sample_index here to avoid sample names that have now changed!
-	my $sth = $dbh->prepare("select sample_name from experiment where sample_name like '%"."$like"."%' and update_number = 7;");
+	my $sth = $dbh->prepare("select sample_name from experiment_cluster where sample_name like '%"."$like"."%';");
 	$sth->execute();
 	while( my ($exp_id)=  $sth->fetchrow_array()){ 
 		push (@exps,$exp_id);
@@ -111,8 +110,8 @@ if(defined($like)){
 }elsif(defined($order)){
 	if(defined($sort)){
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare("select sample_name from snapshot_evolution_collapsed order by abs($sort);");
-	$sth->execute();
+	my $sth = $dbh->prepare("select experiment_id from snapshot_evolution where genome = 'hs' and label =? order by proportion $sort limit ?;");
+	$sth->execute($order,$lim);
 	while( my ($exp_id)=  $sth->fetchrow_array()){ 
 		push (@exps,$exp_id);
 	}
@@ -140,7 +139,7 @@ my $dbh = dbConnect('trap');
 sub get_exp_name {
 	my $exp = shift;
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare('select sample_name from experiment where sample_name = ? ;');
+	my $sth = $dbh->prepare('select sample_name from experiment where experiment_id = ? and update_number = 7;');
 	$sth->execute($exp);
 	my $name;
 	while( my @temp =  $sth->fetchrow_array()){ 
@@ -172,13 +171,7 @@ sub get_times {
 	my %times;
 	foreach $exp (@exps){
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare('select collapsed_taxon_details.distance,common_taxa_names.name,snapshot_evolution_collapsed.z_score,snapshot_evolution_collapsed.taxon_id 
-	from snapshot_evolution_collapsed,common_taxa_names,collapsed_taxon_details,sample_index 
-	where sample_index.sample_id = snapshot_evolution_collapsed.sample_id  
-	and sample_index.sample_name = ? 
-	and snapshot_evolution_collapsed.taxon_id = common_taxa_names.taxon_id 
-	and snapshot_evolution_collapsed.taxon_id = collapsed_taxon_details.taxon_id 
-	and common_taxa_names.genome = \'\' ORDER BY collapsed_taxon_details.distance ASC;');
+	my $sth = $dbh->prepare('select distance,label,proportion,taxon_id from snapshot_evolution where experiment_id = ?;');
 	$sth->execute($exp);
 	
 	my $results=[];	
@@ -193,13 +186,13 @@ sub get_times {
 
 sub get_norm_times {
 	my $dbh = dbConnect('trap');
-	my $sth = $dbh->prepare('select max(z_score),min(z_score),std(z_score) from snapshot_evolution_collapsed,collapsed_taxon_details where snapshot_evolution_collapsed.taxon_id = collapsed_taxon_details.taxon_id; ');
+	my $sth = $dbh->prepare('select distance,max(proportion),min(proportion),std(proportion) from snapshot_evolution where genome =\'hs\' group by distance; ');
 	$sth->execute();
 	my %norm_times;
-	while(my ($max,$min,$std)=  $sth->fetchrow_array()){
-		$norm_times{'max'} = 4;
-		$norm_times{'min'} = 4;
-		$norm_times{'std'} = $std;
+	while(my ($distance,$max,$min,$std)=  $sth->fetchrow_array()){
+		$norm_times{$distance}{'max'} = $max;
+		$norm_times{$distance}{'min'} = $min;
+		$norm_times{$distance}{'std'} = $std;
 	}
 	return \%norm_times;
 }
@@ -209,7 +202,7 @@ sub get_norm_times {
 sub draw_timeline {
 	my ($width,$height,$times,$norms) = @_;
 	my $diagram = '';
-	my $points = 12;
+	my $points = scalar(keys %{$norms});
 	my $inc = $width/($points+2);
 	my $no_samples = scalar(keys %{$times});
 	my $timeline_y = $height-(6*$inc);
@@ -231,7 +224,7 @@ EOF
 	
 	#Draw the time and scale lines
 	my $w = $width -100;
-        my $w2 = $width -200;
+        my $w2 = $width - 200;
 	$diagram .= <<EOF
 	<line x1="0" y1="$scale_y" x2="$width" y2="$scale_y" style="stroke: #333; stroke-width: 1;" />
 EOF
@@ -246,43 +239,24 @@ foreach my $exp (keys %times)	{
 	my @cluster_info=@{$cluster_info};
 	my $up = $timeline_y+($inc/2);
 	my $down = $timeline_y-($inc/2);
-	my $up_half = $timeline_y+($inc/4);
-	my $down_half = $timeline_y-($inc/4);
-	my $up_text = $timeline_y+($inc/2)+5;
-	my $down_text = $timeline_y-($inc/2)+5;
-	my $up_text_half = $timeline_y+($inc/4)+5;
-	        my $down_text_half = $timeline_y-($inc/4)+5;
-	
 	$diagram .= <<EOF
-	
-	<line x1="15" y1="$down" x2="15" y2="$up" style="stroke: #333; stroke-width: 2;" />
-	<line x1="15" y1="$timeline_y" x2="$width" y2="$timeline_y" style="stroke: #333; stroke-width: 2;" />
-	<line x1="15" y1="$up" x2="$width" y2="$up" style="stroke-opacity: 0.2;stroke: #333; stroke-width: 1;" />
-	<line x1="15" y1="$down" x2="$width" y2="$down" style="stroke-opacity: 0.2;stroke: #333; stroke-width: 1;" />
-	 <text x="17" y="$down_text" text-anchor="right" style="font-size:14px">4</text>
-	  <text x="17" y="$up_text" text-anchor="right" style="font-size:14px">-4</text>
-	   <text x="17" y="$down_text_half" text-anchor="right" style="font-size:14px">2</text>
-	   <text x="17" y="$up_text_half" text-anchor="right" style="font-size:14px">-2</text>
-	<line x1="15" y1="$down_half" x2="$width" y2="$down_half" style="stroke-opacity: 0.1;stroke: #333; stroke-width: 1;" />
-	<line x1="15" y1="$up_half" x2="$width" y2="$up_half" style="stroke-opacity: 0.1;stroke: #333; stroke-width: 1;" />
-	<text x="3" y="$down_half" text-anchor="right" style="font-size:12px" transform="rotate(90 3,$down_half)">z-value</text>
-	
+	<line x1="0" y1="$timeline_y" x2="$width" y2="$timeline_y" style="stroke: #333; stroke-width: 1;" />
+	<line x1="0" y1="$up" x2="$width" y2="$up" style="stroke-opacity: 0.2;stroke: #333; stroke-width: 1;" />
+	<line x1="0" y1="$down" x2="$width" y2="$down" style="stroke-opacity: 0.2;stroke: #333; stroke-width: 1;" />
 EOF
 	;
 	
 	    
 		#Draw the labels
-		my $max;
-		my $downbit = $down - 15;
 		$diagram .= <<EOF
 		<a xlink:href="cell_timeline.cgi?exp=$exp">
-		<text x="10" y="$downbit" text-anchor="right" style="font-size:25px">$name</text>
+		<text x="10" y="$down" text-anchor="right" style="font-size:25px">$name</text>
 		</a>
 		<a xlink:href="cell_timeline.cgi?cluster=$cluster_info[1]">                                                   
-		<text x="$w" y="$down" text-anchor="right" style="font-size:15px">unit:$cluster_info[1]</text>
+		<text x="$w" y="$down" text-anchor="right" style="font-size:25px">$cluster_info[1]</text>
                 </a>
 		<a xlink:href="cell_timeline.cgi?unit=$cluster_info[0]">
-                <text x="$w2" y="$down" text-anchor="right" style="font-size:15px">cluster:$cluster_info[0]</text>
+                <text x="$w2" y="$down" text-anchor="right" style="font-size:25px">$cluster_info[0]</text>
                 </a>
 EOF
 		;
@@ -307,7 +281,7 @@ EOF
 		my $rotate = $dy - ($font/2);
 		$diagram .= <<EOF
 		<a xlink:href="cell_timeline.cgi?order=$label">
-		<text x="$dx" y="$dy" text-anchor="right" style="font-size:15px" transform="rotate(90 $dx,$rotate)">$label</text>
+		<text x="$dx" y="$dy" text-anchor="right" style="font-size:20px" transform="rotate(90 $dx,$rotate)">$label</text>
 		</a>
 EOF
 		;
@@ -321,19 +295,19 @@ EOF
 		my $barw =20;
 		my $bar_y = $timeline_y;
 		if($times->{$exp}{$time}{'size'} > 0){
-			if(($norms->{'max'} == 0)||($times{$exp}{$time}{'size'} == 0)){
+			if(($norms->{$time}{'max'} == 0)||($times{$exp}{$time}{'size'} == 0)){
 				$size = 0;
 			}else{
-			$size = (abs(($times{$exp}{$time}{'size'}/$norms->{'max'})*($inc/2)));
+			$size = (abs(($times{$exp}{$time}{'size'}/$norms->{$time}{'max'})*($inc/2)));
 			}
 			$color = 'cyan';
 			$bar_y = $bar_y - $size;
 		}else{
 			$color = 'red';
-			if(($norms->{'min'} == 0)||($times{$exp}{$time}{'size'} == 0)){
+			if(($norms->{$time}{'min'} == 0)||($times{$exp}{$time}{'size'} == 0)){
 				$size = 0;
 			}else{
-			$size = abs($times{$exp}{$time}{'size'}/$norms->{'min'})*($inc/2);
+			$size = abs($times{$exp}{$time}{'size'}/$norms->{$time}{'min'})*($inc/2);
 			}
 		}
 		#Draw the circles
@@ -359,9 +333,9 @@ EOF
 my $times = get_times(\@exps);
 my $norm_times = get_norm_times();
 
-my $points = 12;
+my $points = scalar(keys %{$norm_times});
 my $no_samples = scalar(keys %{$times});
-my $width = 1500;
+my $width = 1000;
 my $inc = $width/($points+2);
 my $height = ($no_samples*$inc*2)+(6*$inc);
 print $cgi->header("image/svg+xml");

@@ -1,0 +1,23 @@
+8	9606	9606	Homo sapiens	0
+20	9606	207598	Homininae (Humans, Gorillas, Chimps)	0.0133379429147171
+7	9606	9604	Hominidae (Great Apes)	0.0155635517562428
+6	9606	9526	Catarrhini (Old World monkeys and apes)	0.0186549582414519
+22	9606	314293	Simiiformes (Old/New World monkeys and apes)	0.0226873105516081
+23	9606	376913	Haplorrhini (Dry-nosed Primates)	0.0336727818206065
+5	9606	9443	Primates	0.0341709673441248
+21	9606	314146	Euarchontoglires (Rodents and Primates)	0.0347009543608347
+4	9606	9347	Eutheria (Placental-like Mammals)	0.0374235460633683
+11	9606	32525	Theria (Live birth Mammals)	0.0421381332271903
+17	9606	40674	Mammalia (Placental mammals, Marsupials and Monotremes)	0.0475280441249229
+10	9606	32524	Amniota (Four limbed vertebrates with terrestrial eggs)	0.0508187208353443
+9	9606	32523	Tetrapoda (Four limbed vertebrates)	0.0551105550043747
+18	9606	117571	Euteleostomi (Bony vertebrates)	0.0601857674472925
+3	9606	7711	Chordata (Have a notochord/spinal column)	0.0986155380785474
+16	9606	33511	Deuterostomia (Mouth comes second, after anus)	0.108434401637149
+15	9606	33316	Coelomata (Body cavity forming)	0.118819571286418
+14	9606	33213	Bilateria (Bilateral symmetry forming)	0.128863858256449
+2	9606	6072	Eumetazoa (True tissue forming animals)	0.142539455647499
+13	9606	33208	Metazoa (All multicellular animals)	0.175749712822631
+12	9606	33154	Opisthokonta (Animal-like and Fungi-like)	0.253921729675933
+1	9606	2759	Eukaryota	0.305086434275799
+19	9606	131567	Cellular organisms	0.357393287147835

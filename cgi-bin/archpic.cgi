@@ -79,6 +79,11 @@ my $genome = (defined $cgi->param('genome'))?$cgi->param('genome'):undef;
 #Specify a list of comb ids
 my $combids = (defined $cgi->param('combids'))?$cgi->param('combids'):undef;
 
+
+#incase you only want 1 of each combids
+my $singlecomb = (defined $cgi->param('singlecomb'))?$cgi->param('singlecomb'):undef;
+
+
 #Specify a list of seqids
 my $seqids = (defined $cgi->param('seqids'))?$cgi->param('seqids'):undef;
 
@@ -99,13 +104,13 @@ if (defined $seqids) {
 
 #Add on the combids to the list of proteins
 if (defined $combids) {
-	error("Genome Undefined") unless defined $genome;
+	error("Genome Undefined combids $singlecomb") unless defined $genome;
 	$combids =~ s/[^\d,]//g;
 	if ($proteins) {
-		$proteins = join ',',comb_to_protein([split /,/, $combids],$genome), $proteins;
+		$proteins = join ',',comb_to_protein([split /,/, $combids],$genome,$singlecomb), $proteins;
 	}
 	else {
-		$proteins = join ',',comb_to_protein([split /,/, $combids],$genome);
+		$proteins = join ',',comb_to_protein([split /,/, $combids],$genome,$singlecomb);
 	}
 }
 
@@ -397,17 +402,21 @@ sub colourset {
 	Convert combids to unique protein ids
 =cut
 sub comb_to_protein {
-	my ($combs,$genome) = @_;
+	my ($combs,$genome,$singlecomb) = @_;
 	my %proteins = ();
 	#my $dbh= DBI->connect("dbi:mysql:database=superfamily;host=$db_host",$db_user,$db_password) or die $DBI::errstr;	
 	my $dbh= DBI->connect("dbi:mysql:database=superfamily;host=localhost",'oates',undef) or die $DBI::errstr;
-
-	foreach my $comb (@$combs) {
-		my $result = $dbh->selectall_arrayref("select distinct protein.protein from comb, protein where comb.protein = protein.protein and protein.genome = ? and comb_id = ?;", undef, $genome, $comb);
-		foreach my $protein (@$result) {
-			$proteins{$protein->[0]}++;
-		}
+	        foreach my $comb (@$combs) {
+	        my $result = $dbh->selectall_arrayref("select distinct protein.protein from comb, protein where comb.protein = protein.protein and protein.genome = ? and comb_id = ?;", undef, $genome, $comb);
+	        if(defined($singlecomb)){
+	        	my $protein = $$result[0];
+	        	$proteins{$protein->[0]}++;
+	        }else{
+	        foreach my $protein (@$result) {
+	        	$proteins{$protein->[0]}++;
+	        }
 	}
+	}		
 	return keys %proteins;
 }
 

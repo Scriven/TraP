@@ -1,4 +1,4 @@
-./data/
+data/
 #
 # Vim
 #
@@ -7,11 +7,15 @@
 *~
 
 # Vim creates swapfiles for open files; ignore these
-.*.swp
+*.swp
 
 #
 # Data
 #
-
-data
-.*.dat
+*.tsv
+*.dat
+*.lzma
+*.sql
+sql/
+old/
+files/

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>The Transcribed Proteome</title>
+<link rel="stylesheet" href="css/reset.css" />
+<link rel="stylesheet" href="css/text.css" />
+<link rel="stylesheet" href="css/960.css" />
+<link rel="stylesheet" href="style.css" type="text/css">
+<!--<link rel="stylesheet" href="css/uncompressed/demo.css" />-->
+</head>
+<body>
+<div id="header"></div>
+	<div class="container_12">	
+	<div id="nav">
+		<ul>
+			<li><a href="index.html">Home</a></li>
+			<li><a href="http://supfam.org/bioinformatics/people.php">Contact</a></li>
+			<li><a href="download.html">Download</a></li>
+		</ul>
+	</div>
+	
+	<div class="clear"></div>
+	
+		<div id="headline" class="grid_12">
+			<h2>The Transcribed Proteome</h2>
+			<p>Database Download Page</p>
+		</div>
+	
+		<div class="clear"></div>
+	        
+       </div>                                                     
+
+<div id='main'>
+
+	<div class="clear"></div>
+	
+		<div id="headline" class="grid_12">
+			<h1>DOWNLOAD DATABASE</h1>
+		</div>
+
+
+		<div id="lineItemText" class="grid_12">
+			<p><a href="./files/TraP12Feb2013.sql.tar.lzma">DOWNLOAD LINK</a> for SQL compatible database dump (ca. 260MB). You will need a version of the SUPERFAMILY database to study protein annotation (available <a href="http://supfam.cs.bris.ac.uk/SUPERFAMILY/downloads.html">here</a> after registration).<br> Note, by dowloading this resource, you are implicitly agreeing to the below warranty agreement.</p>
+			<p><br>WARRANTY:THE LICENSED PROGRAM IS PROVIDED "AS IS" WITHOUT ANY WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR LOSS OF PROFIT, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR OTHER PECUNIARY LOSS, INCLUDING BUT NOT LIMITED TO SPECIAL INCIDENTAL CONSEQUENTIAL OR OTHER DAMAGES. LICENSEE WILL NOT HOLD THE AUTHORS OR ITS EMPLOYEES OR AGENTS RESPONSIBLE FOR ANY CONSEQUENCES ARISING FROM LICENSEE'S USE OF THE PACKAGE. LICENSEE WILL HOLD HARMLESS THE AUTHORS FOR ANY LOSSES OR DAMAGES OF WHATSOEVER NATURE ARISING FROM LICENSEE'S USE OF THE PACKAGE.</p>
+		</div>
+		        
+       </div>                                                     
+
+
+	<div class="clear"></div>
+	
+		<div id="headline" class="grid_12">
+			<h1>GUIDE TO LOADING DATABASE</h1>
+
+			<strong>-</strong> Uncompress the Transcribed Proteome (TraP) database tables:
+			<pre class="citation_title">tar -- lzma -xvf TraP&lt;date&gt;.sql.tar.lzma
+			</pre>
+
+			<strong>-</strong> Create the database and load the database tables:
+			<pre class="citation_title">mysql -p -u root -e "<span class="burgundy_text">CREATE DATABASE</span> trap;" <br>cat TraP&lt;date&gt;.sql | mysql -p -u root trap</pre>
+		</div>
+		<div class="clear"></div>
+
+		        
+       </div>                                                     
+
+
+	<div class="clear"></div>
+	
+		<div id="headline" class="grid_12">
+			<h1>VIEW DATABASE SCHEMA</h1>
+			
+			<p><a href="./files/TrapSchema.png"><img src="./files/TrapSchema.png" alt="Click To Download Database Schema Diagram" height="300"></a></p>
+		</div>
+		<div class="clear"></div>
+
+		        
+       </div>                                                     
+
+</div>                                                                
+</div>
+
+<div id="footer"></div>
+<!-- end .container_24 -->
+</body>
+</html>
